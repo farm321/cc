@@ -200,7 +200,21 @@ $ranks = $conn->query($rank_sql);
             <a class="navbar-brand fw-bold text-primary" href="dashboard_student.php">
                 <i class="bi bi-house-door-fill"></i> HOME
             </a>
-            <div class="ms-auto">
+            <div class="ms-auto d-flex align-items-center">
+                <!-- ปุ่มโปรไฟล์ -->
+                <a href="profile_student.php" class="btn btn-light btn-sm rounded-pill px-3 me-2" style="border: 2px solid #667eea;">
+                    <?php
+                    // ดึงรูปโปรไฟล์จากฐานข้อมูล
+                    $profile_query = "SELECT profile_img FROM users WHERE id = $student_id";
+                    $profile_result = $conn->query($profile_query);
+                    $profile_data = $profile_result->fetch_assoc();
+                    $profile_image = !empty($profile_data['profile_img']) ? $profile_data['profile_img'] : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' . urlencode($_SESSION['fullname']);
+                    ?>
+                    <img src="<?php echo $profile_image; ?>" 
+                         alt="Profile" 
+                         style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
+                    <span style="color: #667eea; font-weight: 600;">โปรไฟล์</span>
+                </a>
                 <a href="logout.php" class="btn btn-outline-danger btn-sm rounded-pill px-4">Logout</a>
             </div>
         </div>

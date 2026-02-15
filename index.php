@@ -21,8 +21,8 @@
             margin: 0;
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* ย้าย Card ไปทางขวา */
-            padding-right: 8%; /* เว้นระยะจากขอบขวา */
+            justify-content: flex-end; /* Desktop: ชิดขวา */
+            padding-right: 8%; /* Desktop: เว้นระยะขวา */
             overflow: hidden;
         }
 
@@ -118,15 +118,49 @@
         .icon-fb { color: #1877F2; }
         .icon-tel { color: #34A853; }
 
+        /* สไตล์ปุ่มคู่มือ */
+        .manual-btn {
+            background: white;
+            color: #64b5f6;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .manual-btn:hover {
+            background: #64b5f6;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ========================================= */
+        /* 🔥 เพิ่มส่วนนี้: ปรับแต่งสำหรับมือถือ 🔥   */
+        /* ========================================= */
+        @media (max-width: 991px) {
+            body {
+                justify-content: center; /* เปลี่ยนเป็นจัดกึ่งกลาง */
+                padding-right: 0;        /* ยกเลิกการเว้นขวา */
+                padding-left: 15px;      /* เพิ่มระยะห่างซ้ายนิดหน่อยกันติดจอ */
+                padding-right: 15px;     /* เพิ่มระยะห่างขวานิดหน่อยกันติดจอ */
+            }
+            
+            .login-card {
+                padding: 40px 25px;      /* ลด Padding ในการ์ดนิดนึงให้ไม่แน่นจอเกินไป */
+            }
+        }
+
     </style>
 </head>
 <body>
+
+    <a href="manual.php" class="btn manual-btn position-absolute top-0 start-0 m-4 rounded-pill px-4 py-2 text-decoration-none" style="z-index: 1000;">
+        <i class="fa-solid fa-book-open me-2"></i> คู่มือการใช้งาน
+    </a>
 
     <div class="login-card">
         <div class="text-center mb-5">
             <img src="https://cdn-icons-png.flaticon.com/512/3222/3222800.png" width="80" alt="Logo" class="mb-3">
             <h2 style="font-weight: 600; color: #333;">School App!</h2>
-            <p class="text-muted">กรุณาเข้าสู่ระบบเพื่อใช้งาน Student Hero</p>
+            <p class="text-muted">กรุณาเข้าสู่ระบบเพื่อใช้งาน School App!</p>
         </div>
         
         <form action="check_login.php" method="POST">

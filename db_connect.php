@@ -1,9 +1,9 @@
 <?php
 // ข้อมูลการเชื่อมต่อฐานข้อมูล
 $servername = "localhost";
-$username = "root"; // เปลี่ยนตามของคุณ
-$password = "12345678"; // เปลี่ยนตามของคุณ
-$dbname = "fa_db"; // ชื่อฐานข้อมูลตาม SQL file ที่คุณอัปโหลด
+$username = "school60_fa_db"; // เปลี่ยนตามของคุณ
+$password = "TgBPAKHRTAucQNrVfXJK"; // เปลี่ยนตามของคุณ
+$dbname = "school60_fa_db"; // ชื่อฐานข้อมูลตาม SQL file ที่คุณอัปโหลด
 
 // สร้างการเชื่อมต่อ
 $conn = new mysqli($servername, $username, $password, $dbname);
