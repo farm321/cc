@@ -336,7 +336,9 @@ $filter_class = $_GET['class'] ?? '';
             <div class="row g-3">
                 <?php
                 // สร้าง Query
-                $sql = "SELECT users.*, sm.student_code, sm.year_level, sm.classroom, COALESCE(SUM(bl.score), 0) as total_score 
+                $sql = "SELECT users.id, users.username, users.fullname, users.phone, 
+               users.profile_img, users.profile_image,
+               sm.student_code, sm.year_level, sm.classroom, COALESCE(SUM(bl.score), 0) as total_score 
                     FROM users 
                     JOIN student_meta sm ON users.id = sm.user_id 
                     LEFT JOIN behavior_logs bl ON users.id = bl.student_id 
@@ -354,12 +356,19 @@ $filter_class = $_GET['class'] ?? '';
 
                 // วนลูปแสดงการ์ด
                 if ($res): while ($row = $res->fetch_assoc()):
-                        // เช็ครูปภาพ
-                        $img_src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" . $row['username'];
-                        if (!empty($row['profile_image']) && file_exists("uploads/" . $row['profile_image'])) {
-                            $img_src = "uploads/" . $row['profile_image'];
-                        }
-                ?>
+                       // เช็ครูปภาพ (แก้ไขแล้ว - รองรับ profile_img)
+$img_src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" . urlencode($row['username']);
+
+// เช็ค profile_img ก่อน (จากหน้าสมัคร)
+if (!empty($row['profile_img']) && $row['profile_img'] != 'default.png') {
+    if (file_exists($row['profile_img'])) {
+        $img_src = $row['profile_img'];
+    }
+}
+// เช็ค profile_image สำหรับข้อมูลเก่า
+elseif (!empty($row['profile_image']) && file_exists("uploads/" . $row['profile_image'])) {
+    $img_src = "uploads/" . $row['profile_image'];
+}
                         <div class="col-6 col-md-3">
                             <div class="card border-0 shadow-sm p-3 text-center h-100 rounded-4 position-relative">
                                 <div class="dropdown position-absolute top-0 end-0 m-2">
@@ -525,10 +534,17 @@ $filter_class = $_GET['class'] ?? '';
                     <div class="card border-0 shadow-sm p-4 rounded-4">
                         <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-plus-fill"></i> เพิ่มผู้ปกครองใหม่</h6>
                         <form action="teacher_action.php?action=add_parent" method="POST">
-                            <div class="mb-3">
-                                <label class="form-label small text-muted">ชื่อ-นามสกุล ผู้ปกครอง</label>
-                                <input type="text" name="fullname" class="form-control rounded-pill" placeholder="เช่น นายสมชาย ใจดี" required>
-                            </div>
+                            <!-- แยกชื่อ-นามสกุล -->
+<div class="row mb-3">
+    <div class="col-6">
+        <label class="form-label small text-muted">ชื่อ <span class="text-danger">*</span></label>
+        <input type="text" name="firstname" id="parent_firstname" class="form-control rounded-pill" placeholder="ชื่อ" required>
+    </div>
+    <div class="col-6">
+        <label class="form-label small text-muted">นามสกุล <span class="text-danger">*</span></label>
+        <input type="text" name="lastname" id="parent_lastname" class="form-control rounded-pill" placeholder="นามสกุล" required>
+    </div>
+</div>
                             <div class="mb-3">
                                 <label class="form-label small text-muted">Username (เบอร์โทร)</label>
                                 <input type="text" name="username" class="form-control rounded-pill" placeholder="ใช้สำหรับล็อกอิน" required>
@@ -538,9 +554,17 @@ $filter_class = $_GET['class'] ?? '';
                                 <input type="password" name="password" class="form-control rounded-pill" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small text-muted">รหัสนักเรียน (บุตรหลาน)</label>
-                                <input type="text" name="child_student_code" class="form-control rounded-pill" placeholder="ระบุรหัสนักเรียน เช่น ST001" required>
-                            </div>
+    <label class="form-label small text-muted">รหัสนักเรียน (บุตรหลาน) <span class="text-danger">*</span></label>
+    <input type="text" 
+           name="child_student_code" 
+           id="parent_child_code"
+           class="form-control rounded-pill" 
+           placeholder="65414401021"
+           pattern="[0-9]+"
+           title="กรุณากรอกเฉพาะตัวเลข"
+           required>
+    <small class="text-muted">กรอกเฉพาะตัวเลข</small>
+</div>
                             <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">
                                 <i class="bi bi-save"></i> บันทึกข้อมูล
                             </button>
@@ -809,8 +833,28 @@ $filter_class = $_GET['class'] ?? '';
                             <input type="file" name="profile_image" class="form-control" accept="image/*" onchange="previewImage(event, 'preview_add')">
                             <small class="text-muted">เว้นว่างถ้าต้องการใช้รูปสุ่ม</small>
                         </div>
-                        <div class="mb-2"><label>ชื่อ-นามสกุล</label><input type="text" name="fullname" class="form-control" required></div>
-                        <div class="mb-2"><label>รหัสนักเรียน</label><input type="text" name="student_code" class="form-control" required></div>
+                        <!-- แยกชื่อ-นามสกุล -->
+<div class="row mb-2">
+    <div class="col-6">
+        <label>ชื่อ <span class="text-danger">*</span></label>
+        <input type="text" name="firstname" class="form-control" required>
+    </div>
+    <div class="col-6">
+        <label>นามสกุล <span class="text-danger">*</span></label>
+        <input type="text" name="lastname" class="form-control" required>
+    </div>
+</div>
+                        <div class="mb-2">
+    <label>รหัสนักเรียน <span class="text-danger">*</span></label>
+    <input type="text" 
+           name="student_code" 
+           id="add_student_code"
+           class="form-control" 
+           pattern="[0-9]+"
+           title="กรุณากรอกเฉพาะตัวเลข"
+           required>
+    <small class="text-muted">กรอกเฉพาะตัวเลข เช่น 65414401021</small>
+</div>
                         <div class="mb-2">
                             <label>ระดับชั้น</label>
                             <select name="year_level" class="form-select" required>
@@ -849,7 +893,17 @@ $filter_class = $_GET['class'] ?? '';
                             <input type="file" name="profile_image" class="form-control" accept="image/*" onchange="previewImage(event, 'preview_edit')">
                             <small class="text-muted">เว้นว่างถ้าไม่เปลี่ยนรูป</small>
                         </div>
-                        <div class="mb-2"><label>ชื่อ-นามสกุล</label><input type="text" name="fullname" id="edit_fullname" class="form-control" required></div>
+                        <!-- แยกชื่อ-นามสกุล -->
+<div class="row mb-2">
+    <div class="col-6">
+        <label>ชื่อ <span class="text-danger">*</span></label>
+        <input type="text" name="firstname" id="edit_firstname" class="form-control" required>
+    </div>
+    <div class="col-6">
+        <label>นามสกุล <span class="text-danger">*</span></label>
+        <input type="text" name="lastname" id="edit_lastname" class="form-control" required>
+    </div>
+</div>
                         <div class="mb-2"><label>รหัสนักเรียน</label><input type="text" name="student_code" id="edit_code" class="form-control" required></div>
                         <div class="mb-2">
                             <label>ระดับชั้น</label>
@@ -889,9 +943,17 @@ $filter_class = $_GET['class'] ?? '';
                         </div>
                         
                         <div class="mb-3">
-                            <label>รหัสนักเรียน (ของลูกคนใหม่):</label>
-                            <input type="text" name="new_child_code" class="form-control" placeholder="กรอกรหัสนักเรียน เช่น ST002" required>
-                        </div>
+    <label>รหัสนักเรียน (ของลูกคนใหม่): <span class="text-danger">*</span></label>
+    <input type="text" 
+           name="new_child_code" 
+           id="new_child_code"
+           class="form-control" 
+           placeholder="65414401021"
+           pattern="[0-9]+"
+           title="กรุณากรอกเฉพาะตัวเลข"
+           required>
+    <small class="text-muted">กรอกเฉพาะตัวเลข</small>
+</div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
@@ -902,41 +964,70 @@ $filter_class = $_GET['class'] ?? '';
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function openScoreModal(id, name) {
-            document.getElementById('modal_st_id').value = id;
-            document.getElementById('modal_st_name').innerText = name;
-            new bootstrap.Modal(document.getElementById('scoreModal')).show();
-        }
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openScoreModal(id, name) {
+        document.getElementById('modal_st_id').value = id;
+        document.getElementById('modal_st_name').innerText = name;
+        new bootstrap.Modal(document.getElementById('scoreModal')).show();
+    }
 
-        function openEditStudentModal(id, username, fullname, code, year, classroom) {
-            document.getElementById('edit_id').value = id;
-            document.getElementById('edit_username').value = username;
-            document.getElementById('edit_fullname').value = fullname;
-            document.getElementById('edit_code').value = code;
-            document.getElementById('edit_year_level').value = year; // ใส่ค่าระดับชั้น
-            document.getElementById('edit_classroom').value = classroom;
-            new bootstrap.Modal(document.getElementById('editStudentModal')).show();
-        }
+    function openEditStudentModal(id, username, fullname, code, year, classroom) {
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_username').value = username;
+    
+    // แยกชื่อ-นามสกุล
+    const nameParts = fullname.split(' ');
+    const firstname = nameParts[0] || '';
+    const lastname = nameParts.slice(1).join(' ') || '';
+    
+    document.getElementById('edit_firstname').value = firstname;
+    document.getElementById('edit_lastname').value = lastname;
+    document.getElementById('edit_code').value = code;
+    document.getElementById('edit_year_level').value = year;
+    document.getElementById('edit_classroom').value = classroom;
+    new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+}
 
-        function previewImage(event, targetId) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById(targetId).src = e.target.result;
-                }
-                reader.readAsDataURL(file);
+    function previewImage(event, targetId) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(targetId).src = e.target.result;
             }
+            reader.readAsDataURL(file);
         }
-        
-        // ฟังก์ชันเปิด Modal เพิ่มลูก
-        function openAddChildModal(parentId, parentName) {
-            document.getElementById('append_parent_id').value = parentId;
-            document.getElementById('append_parent_name').value = parentName;
-            new bootstrap.Modal(document.getElementById('addChildModal')).show();
-        }
-    </script>
+    }
+    
+    // ฟังก์ชันเปิด Modal เพิ่มลูก
+    function openAddChildModal(parentId, parentName) {
+        document.getElementById('append_parent_id').value = parentId;
+        document.getElementById('append_parent_name').value = parentName;
+        new bootstrap.Modal(document.getElementById('addChildModal')).show();
+    }
+
+    // ===== เพิ่มส่วนนี้ =====
+    // ป้องกันการกรอกตัวอักษรในช่องรหัสนักเรียน
+    document.getElementById('add_student_code')?.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // ป้องกันการกรอกตัวอักษรในช่องรหัสนักเรียน (Modal แก้ไข)
+    document.getElementById('edit_code')?.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // ป้องกันการกรอกตัวอักษรในช่องรหัสบุตรหลาน (ผู้ปกครอง)
+    document.getElementById('parent_child_code')?.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // ป้องกันการกรอกตัวอักษรในช่องเพิ่มลูก
+    document.getElementById('new_child_code')?.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    // ===== จบส่วนที่เพิ่ม =====
+</script>
 </body>
 </html>

@@ -539,7 +539,7 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
                         <h3 class="mb-1"><?php echo $row_child['fullname']; ?></h3>
                         <p class="mb-0 opacity-75">
                             <i class="bi bi-card-text"></i> รหัส: <?php echo $row_child['student_code']; ?> | 
-                            <i class="bi bi-book"></i> ชั้น ป.<?php echo $row_child['year_level']; ?>/<?php echo $row_child['classroom']; ?>
+                            <i class="bi bi-book"></i> ชั้น ม.<?php echo $row_child['year_level']; ?>/<?php echo $row_child['classroom']; ?>
                         </p>
                     </div>
                     <div class="col-md-3 text-end">
